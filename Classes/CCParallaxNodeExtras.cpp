@@ -7,7 +7,7 @@ class CCPointObject:CCObject{
 };
 
 CCParallaxNodeExtras::CCParallaxNodeExtras(){
-	CCParallaxNode::CCParallaxNode();
+	CCParallaxNode::create();
 }
 
 CCParallaxNodeExtras *CCParallaxNodeExtras::node(){

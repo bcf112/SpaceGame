@@ -10,7 +10,7 @@ public:
 
 	CCParallaxNodeExtras();
 
-	// later cast와 safety를 피하기 위한 것임.
+	// later cast를피하고 Safety를 위한 것임.
 	static CCParallaxNodeExtras *node();
 
 	//기능 함수
