@@ -8,6 +8,12 @@
 
 using namespace cocos2d;
 
+//승패 판정
+typedef enum{
+	KENDREASONWIN,
+	KENDREASONLOSE
+}EndReason;
+
 class HelloWorld : public cocos2d::CCLayer
 {
 private:
@@ -24,8 +30,27 @@ private:
 
 	void update(float dt);
 
+	//가속계로 우주선 움직이기
 	float _shipPointsPerSecY;
 	virtual void didAccelerate(CCAcceleration *pAccelerationValue);
+
+	//운석 추가
+	CCArray *_asteroids;
+	unsigned int _nextAsteroid;
+	float _nextAsteroidSpawn;
+
+	//레이저 쏘기
+	CCArray *_shipLasers;
+	int _nextShipLaser;
+
+	//충돌판정
+	int _lives;
+
+	//승패판정
+	double _gameOverTime;
+	bool _gameOver;
+	void endScene(EndReason endReason);
+	void restartTapped(CCObject *object);
 	
 public:
     // Here's a difference. Method 'init' in cocos2d-x returns bool, instead of returning 'id' in cocos2d-iphone
@@ -39,6 +64,14 @@ public:
 
     // implement the "static node()" method manually
     CREATE_FUNC(HelloWorld);
+
+	//운석 추가
+	float randomValueBetween(float low, float high);
+	void setInvisible(CCNode *node);
+	float getTimeTick();
+
+	//레이저 쏘기
+	virtual void ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent);
 };
 
 #endif  // __HELLOWORLD_SCENE_H__

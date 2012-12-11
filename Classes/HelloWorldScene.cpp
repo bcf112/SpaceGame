@@ -1,3 +1,6 @@
+#define KNUMASTEROIDS 15
+#define KNUMLASERS 5
+
 #include "HelloWorldScene.h"
 
 using namespace cocos2d;
@@ -104,6 +107,34 @@ bool HelloWorld::init()
 		//Accelerometer로 우주선 움직이기
 		this->setAccelerometerEnabled(true);
 
+		//운석 추가
+		_asteroids=new CCArray();
+		for(int i=0; i<KNUMASTEROIDS; i++){
+			CCSprite *asteroid=CCSprite::createWithSpriteFrameName("asteroid.png");
+			asteroid->setVisible(true);
+			_batchNode->addChild(asteroid);
+			_asteroids->addObject(asteroid);
+		}
+		_nextAsteroid=0;
+
+		//레이저 쏘기
+		_shipLasers=new CCArray();
+		for(int i=0; i<KNUMLASERS; i++){
+			CCSprite *shipLaser=CCSprite::createWithSpriteFrameName("laserbeam_blue.png");
+			shipLaser->setVisible(false);
+			_batchNode->addChild(shipLaser);
+			_shipLasers->addObject(shipLaser);
+		}
+		this->setTouchEnabled(true);
+		_nextShipLaser=0;
+
+		//승패 판정
+		_lives=3;
+		double curTime=getTimeTick();
+		_gameOverTime=curTime+30000;
+		_gameOver=false;
+
+
 		bRet=true;
     } while (0);
 
@@ -153,15 +184,78 @@ void HelloWorld::update(float dt){
 	}
 
 
-
+	//Accelometer로 비행선 움직이기
 	CCSize winSize=CCDirector::sharedDirector()->getWinSize();
-	float maxY=winSize.height - _ship->getContentSize().height/2;
-	float minY=_ship->getContentSize().height/2;
+	//float maxY=winSize.height - _ship->getContentSize().height/2;
+	//float minY=_ship->getContentSize().height/2;
 
-	float diff=(_shipPointsPerSecY * dt);
-	float newY=_ship->getPosition().y + diff;
-	newY=MIN(MAX(newY, minY), maxY);
-	_ship->setPosition(ccp(_ship->getPosition().x, newY));
+	//float diff=(_shipPointsPerSecY * dt);
+	//float newY=_ship->getPosition().y + diff;
+	//newY=MIN(MAX(newY, minY), maxY);
+	//_ship->setPosition(ccp(_ship->getPosition().x, newY));
+
+
+	//운석 추가
+	float curTimeMillis=getTimeTick();
+	if(curTimeMillis > _nextAsteroidSpawn){
+
+		float randMillisecs=randomValueBetween(0.20, 1.0) * 1000;
+		_nextAsteroidSpawn=randMillisecs + curTimeMillis;
+
+		float randY=randomValueBetween(0.0, winSize.height);
+		float randDuration=randomValueBetween(2.0, 10.0);
+
+		CCSprite *asteroid=(CCSprite *)_asteroids->objectAtIndex(_nextAsteroid);
+		_nextAsteroid++;
+
+		if(_nextAsteroid >= _asteroids->count()){
+			_nextAsteroid=0;
+		}
+
+		asteroid->stopAllActions();
+		asteroid->setPosition(ccp(winSize.width + asteroid->getContentSize().width/2, randY));
+		asteroid->setVisible(true);
+		asteroid->runAction(CCSequence::create(CCMoveBy::create(randDuration, ccp(-winSize.width - asteroid->getContentSize().width, 0)),
+			CCCallFuncN::create(this, callfuncN_selector(HelloWorld::setInvisible)), NULL));
+	}
+
+	CCObject *asteroid, *shipLaser;
+	//충돌판정
+	CCARRAY_FOREACH(_asteroids, asteroid)
+	{
+		CCSprite *s_asteroid=(CCSprite *)asteroid;
+		if(!s_asteroid->isVisible()){
+			continue;
+		}
+		CCARRAY_FOREACH(_shipLasers, shipLaser)
+		{
+			CCSprite *s_shipLaser=(CCSprite *)shipLaser;
+			if(!s_shipLaser->isVisible()){
+				continue;
+			}
+			if(s_shipLaser->boundingBox().intersectsRect(s_asteroid->boundingBox())){
+				s_shipLaser->setVisible(false);
+				s_asteroid->setVisible(false);
+				continue;
+			}
+		}
+
+		if(_ship->boundingBox().intersectsRect(s_asteroid->boundingBox())){
+			s_asteroid->setVisible(false);
+			_ship->runAction(CCBlink::create(1.0, 9));
+			_lives--;
+		}
+	}
+
+
+	//승패판정
+	if(_lives <= 0){
+		_ship->stopAllActions();
+		_ship->setVisible(false);
+		this->endScene(KENDREASONLOSE);
+	}else if(curTimeMillis >= _gameOverTime){
+		this->endScene(KENDREASONWIN);
+	}
 }
 
 void HelloWorld::didAccelerate(cocos2d::CCAcceleration *pAccelerationValue){
@@ -179,5 +273,76 @@ void HelloWorld::didAccelerate(cocos2d::CCAcceleration *pAccelerationValue){
 	float accelDiff=accelX - KRESTACCELX;
 	float accelFraction=accelDiff / KMAXDIFFX;
 	_shipPointsPerSecY = KSHIPMAXPOINTSPERSEC * accelFraction;
+}
+
+float HelloWorld::randomValueBetween(float low, float high){
+	//mac이 아니면 arc4random()함수가 없어서 이렇게 해야된다.
+	return ((rand() % (int)(high - low+1))+1) + low;
+}
+
+float HelloWorld::getTimeTick(){
+	timeval time;
+	gettimeofday(&time, NULL);
+	unsigned long millisecs = (time.tv_sec * 1000) + (time.tv_usec / 1000);
+	return (float)millisecs;
+}
+
+void HelloWorld::setInvisible(CCNode *node){
+	node->setVisible(false);
+}
+
+void HelloWorld::ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent)
+{
+	CCSize winSize=CCDirector::sharedDirector()->getWinSize();
+
+	CCSprite *shipLaser=(CCSprite *)_shipLasers->objectAtIndex(_nextShipLaser++);
+	if(_nextShipLaser >= _shipLasers->count()){
+		_nextShipLaser=0;
+	}
+	shipLaser->setPosition(ccpAdd(_ship->getPosition(), ccp(shipLaser->getContentSize().width/2, 0)));
+	shipLaser->setVisible(true);
+	shipLaser->stopAllActions();
+	shipLaser->runAction(CCSequence::create(CCMoveBy::create(0.5, ccp(winSize.width, 0)),
+		CCCallFuncN::create(this, callfuncN_selector(HelloWorld::setInvisible)),
+		NULL));
+}
+
+void HelloWorld::restartTapped(CCObject *object){
+	CCDirector::sharedDirector()->replaceScene(CCTransitionZoomFlipX::create(0.5, this->scene()));
+
+	//리스케줄
+	this->scheduleUpdate();
+}
+
+void HelloWorld::endScene(EndReason endReason){
+	if(_gameOver){
+		return;
+	}
+	_gameOver=true;
+
+	CCSize winSize=CCDirector::sharedDirector()->getWinSize();
+	char message[10]="You Win";
+	if(endReason == KENDREASONLOSE){
+		strcpy(message, "You Lose");
+	}
+
+	CCLabelBMFont *label=CCLabelBMFont::create(message, "Arial.fnt");
+	label->setScale(0.1);
+	label->setPosition(ccp(winSize.width/2, winSize.height*0.6));
+	this->addChild(label);
+
+	CCLabelBMFont *restartLabel = CCLabelBMFont::create("Restart", "Arial.fnt");
+	CCMenuItemLabel *restartItem = CCMenuItemLabel::create(restartLabel, this, menu_selector(HelloWorld::restartTapped));
+	restartItem->setScale(0.1);
+	restartItem->setPosition(ccp(winSize.width/2, winSize.height*0.4));
+
+	CCMenu *menu=CCMenu::create(restartItem, NULL);
+	menu->setPosition(CCPointZero);
+	this->addChild(menu);
+
+	//clear label and menu
+	restartItem->runAction(CCScaleTo::create(0.5, 1.0));
+	label->runAction(CCScaleTo::create(0.5, 1.0));
+	this->unscheduleUpdate();
 }
 
