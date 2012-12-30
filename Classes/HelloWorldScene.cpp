@@ -196,6 +196,7 @@ void HelloWorld::update(float dt){
 
 
 	//운석 추가
+<<<<<<< HEAD
 	float curTimeMillis = getTimeTick();
 	if(curTimeMillis > _nextAsteroidSpawn) {
 		float randMillisecs = randomValueBetween(0.20, 1.0) * 1000;
@@ -209,6 +210,22 @@ void HelloWorld::update(float dt){
 
 		if(_nextAsteroid >= _asteroids->count()) {
 			_nextAsteroid = 0;
+=======
+	float curTimeMillis=getTimeTick();
+	if(curTimeMillis > _nextAsteroidSpawn){
+
+		float randMillisecs=randomValueBetween(0.20, 1.0) * 1000;
+		_nextAsteroidSpawn=randMillisecs + curTimeMillis;
+
+		float randY=randomValueBetween(0.0, winSize.height);
+		float randDuration=randomValueBetween(2.0, 10.0);
+
+		CCSprite *asteroid=(CCSprite *)_asteroids->objectAtIndex(_nextAsteroid);
+		_nextAsteroid++;
+
+		if(_nextAsteroid >= _asteroids->count()){
+			_nextAsteroid=0;
+>>>>>>> 756870ea570fc410f0cf9643f890b4e3f555c6ce
 		}
 
 		asteroid->stopAllActions();
@@ -225,7 +242,11 @@ void HelloWorld::update(float dt){
 		CCSprite *s_asteroid=(CCSprite *)asteroid;
 		if(!s_asteroid->isVisible()){
 			continue;
+<<<<<<< HEAD
 		} 
+=======
+		}
+>>>>>>> 756870ea570fc410f0cf9643f890b4e3f555c6ce
 		CCARRAY_FOREACH(_shipLasers, shipLaser)
 		{
 			CCSprite *s_shipLaser=(CCSprite *)shipLaser;
@@ -290,6 +311,7 @@ void HelloWorld::setInvisible(CCNode *node){
 	node->setVisible(false);
 }
 
+<<<<<<< HEAD
 void HelloWorld::ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent) {
 	CCSize winSize = CCDirector::sharedDirector()->getWinSize();
 
@@ -325,6 +347,22 @@ void HelloWorld::ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent) {
 
 void HelloWorld::ccTouchesEnded(CCSet *pTouches, CCEvent *pEvent) {
 
+=======
+void HelloWorld::ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent)
+{
+	CCSize winSize=CCDirector::sharedDirector()->getWinSize();
+
+	CCSprite *shipLaser=(CCSprite *)_shipLasers->objectAtIndex(_nextShipLaser++);
+	if(_nextShipLaser >= _shipLasers->count()){
+		_nextShipLaser=0;
+	}
+	shipLaser->setPosition(ccpAdd(_ship->getPosition(), ccp(shipLaser->getContentSize().width/2, 0)));
+	shipLaser->setVisible(true);
+	shipLaser->stopAllActions();
+	shipLaser->runAction(CCSequence::create(CCMoveBy::create(0.5, ccp(winSize.width, 0)),
+		CCCallFuncN::create(this, callfuncN_selector(HelloWorld::setInvisible)),
+		NULL));
+>>>>>>> 756870ea570fc410f0cf9643f890b4e3f555c6ce
 }
 
 void HelloWorld::restartTapped(CCObject *object){
