@@ -209,6 +209,10 @@
 				RelativePath=".\main.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\SpaceShip.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="include"
@@ -232,6 +236,10 @@
 			</File>
 			<File
 				RelativePath=".\resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SpaceShip.h"
 				>
 			</File>
 		</Filter>

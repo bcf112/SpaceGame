@@ -111,7 +111,7 @@ bool HelloWorld::init()
 		_asteroids=new CCArray();
 		for(int i=0; i<KNUMASTEROIDS; i++){
 			CCSprite *asteroid=CCSprite::createWithSpriteFrameName("asteroid.png");
-			asteroid->setVisible(true);
+			asteroid->setVisible(false);
 			_batchNode->addChild(asteroid);
 			_asteroids->addObject(asteroid);
 		}
@@ -196,20 +196,19 @@ void HelloWorld::update(float dt){
 
 
 	//운석 추가
-	float curTimeMillis=getTimeTick();
-	if(curTimeMillis > _nextAsteroidSpawn){
+	float curTimeMillis = getTimeTick();
+	if(curTimeMillis > _nextAsteroidSpawn) {
+		float randMillisecs = randomValueBetween(0.20, 1.0) * 1000;
+		_nextAsteroidSpawn = randMillisecs + curTimeMillis;
 
-		float randMillisecs=randomValueBetween(0.20, 1.0) * 1000;
-		_nextAsteroidSpawn=randMillisecs + curTimeMillis;
+		float randY = randomValueBetween(30.0, winSize.height);
+		float randDuration = randomValueBetween(2.0, 10.0);
 
-		float randY=randomValueBetween(0.0, winSize.height);
-		float randDuration=randomValueBetween(2.0, 10.0);
-
-		CCSprite *asteroid=(CCSprite *)_asteroids->objectAtIndex(_nextAsteroid);
+		CCSprite *asteroid = (CCSprite *)_asteroids->objectAtIndex(_nextAsteroid);
 		_nextAsteroid++;
 
-		if(_nextAsteroid >= _asteroids->count()){
-			_nextAsteroid=0;
+		if(_nextAsteroid >= _asteroids->count()) {
+			_nextAsteroid = 0;
 		}
 
 		asteroid->stopAllActions();
@@ -226,7 +225,7 @@ void HelloWorld::update(float dt){
 		CCSprite *s_asteroid=(CCSprite *)asteroid;
 		if(!s_asteroid->isVisible()){
 			continue;
-		}
+		} 
 		CCARRAY_FOREACH(_shipLasers, shipLaser)
 		{
 			CCSprite *s_shipLaser=(CCSprite *)shipLaser;
@@ -291,20 +290,41 @@ void HelloWorld::setInvisible(CCNode *node){
 	node->setVisible(false);
 }
 
-void HelloWorld::ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent)
-{
-	CCSize winSize=CCDirector::sharedDirector()->getWinSize();
+void HelloWorld::ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent) {
+	CCSize winSize = CCDirector::sharedDirector()->getWinSize();
 
-	CCSprite *shipLaser=(CCSprite *)_shipLasers->objectAtIndex(_nextShipLaser++);
-	if(_nextShipLaser >= _shipLasers->count()){
-		_nextShipLaser=0;
+	CCTouch *touch = (CCTouch *)pTouches->anyObject();
+	CCRect shipBoundingBox = _ship->boundingBox();
+
+	if(shipBoundingBox.containsPoint(convertTouchToNodeSpace(touch))) {
+		_shipState = KSHIPSTATEGRAPPED;
+	}else {
+		_shipState = KSHIPSTAGEUNGRAPPED;
+		CCSprite *shipLaser=(CCSprite *)_shipLasers->objectAtIndex(_nextShipLaser++);
+		if(_nextShipLaser >= _shipLasers->count()){
+			_nextShipLaser = 0;
+		}
+		shipLaser->setPosition(ccpAdd(_ship->getPosition(), ccp(shipLaser->getContentSize().width/2, 0)));
+		shipLaser->setVisible(true);
+		shipLaser->stopAllActions();
+		shipLaser->runAction(CCSequence::create(CCMoveBy::create(0.5, ccp(winSize.width, 0)),
+			CCCallFuncN::create(this, callfuncN_selector(HelloWorld::setInvisible)),
+			NULL));
 	}
-	shipLaser->setPosition(ccpAdd(_ship->getPosition(), ccp(shipLaser->getContentSize().width/2, 0)));
-	shipLaser->setVisible(true);
-	shipLaser->stopAllActions();
-	shipLaser->runAction(CCSequence::create(CCMoveBy::create(0.5, ccp(winSize.width, 0)),
-		CCCallFuncN::create(this, callfuncN_selector(HelloWorld::setInvisible)),
-		NULL));
+
+	CCLOG("shipState : %d", _shipState); 
+}
+
+void HelloWorld::ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent) {
+	if(_shipState == KSHIPSTATEGRAPPED) {
+		CCTouch *touch = (CCTouch *)pTouches->anyObject();
+		CCPoint touchPoint = touch->getLocation();
+		_ship->setPosition(ccp(_ship->getPosition().x, touchPoint.y));
+	}
+}
+
+void HelloWorld::ccTouchesEnded(CCSet *pTouches, CCEvent *pEvent) {
+
 }
 
 void HelloWorld::restartTapped(CCObject *object){

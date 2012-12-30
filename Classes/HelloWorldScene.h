@@ -14,6 +14,11 @@ typedef enum{
 	KENDREASONLOSE
 }EndReason;
 
+typedef enum{
+	KSHIPSTATEGRAPPED,
+	KSHIPSTAGEUNGRAPPED
+} ShipState;
+
 class HelloWorld : public cocos2d::CCLayer
 {
 private:
@@ -51,6 +56,9 @@ private:
 	bool _gameOver;
 	void endScene(EndReason endReason);
 	void restartTapped(CCObject *object);
+
+	//우주선 상태
+	ShipState _shipState;
 	
 public:
     // Here's a difference. Method 'init' in cocos2d-x returns bool, instead of returning 'id' in cocos2d-iphone
@@ -72,6 +80,8 @@ public:
 
 	//레이저 쏘기
 	virtual void ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent);
+	virtual void ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent);
+	virtual void ccTouchesEnded(CCSet *pTouches, CCEvent *pEvent);
 };
 
 #endif  // __HELLOWORLD_SCENE_H__
