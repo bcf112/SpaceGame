@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpaceGame.win32", "SpaceGame.win32.vcproj", "{FEF013F5-A40F-426E-B15D-295A1ED1F42A}"
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpaceGame.win32", "SpaceGame.win32.vcproj", "{B55BB2C8-A767-45AC-9A25-E8E34C4D0FD1}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcocos2d", "..\libs\cocos2dx\proj.win32\cocos2d.vcproj", "{98A51BA8-FC3A-415B-AC8F-8C7BD464E93E}"
 EndProject
@@ -17,10 +17,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{FEF013F5-A40F-426E-B15D-295A1ED1F42A}.Debug|Win32.ActiveCfg = Debug|Win32
-		{FEF013F5-A40F-426E-B15D-295A1ED1F42A}.Debug|Win32.Build.0 = Debug|Win32
-		{FEF013F5-A40F-426E-B15D-295A1ED1F42A}.Release|Win32.ActiveCfg = Release|Win32
-		{FEF013F5-A40F-426E-B15D-295A1ED1F42A}.Release|Win32.Build.0 = Release|Win32
+		{B55BB2C8-A767-45AC-9A25-E8E34C4D0FD1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B55BB2C8-A767-45AC-9A25-E8E34C4D0FD1}.Debug|Win32.Build.0 = Debug|Win32
+		{B55BB2C8-A767-45AC-9A25-E8E34C4D0FD1}.Release|Win32.ActiveCfg = Release|Win32
+		{B55BB2C8-A767-45AC-9A25-E8E34C4D0FD1}.Release|Win32.Build.0 = Release|Win32
 		{98A51BA8-FC3A-415B-AC8F-8C7BD464E93E}.Debug|Win32.ActiveCfg = Debug|Win32
 		{98A51BA8-FC3A-415B-AC8F-8C7BD464E93E}.Debug|Win32.Build.0 = Debug|Win32
 		{98A51BA8-FC3A-415B-AC8F-8C7BD464E93E}.Release|Win32.ActiveCfg = Release|Win32
